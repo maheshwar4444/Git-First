@@ -1,0 +1,151 @@
+App.svelte
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+<script>
+	import Header from './Header.svelte';
+	import Footer from './Footer.svelte';
+	import PollList from './componants/PollList.svelte';
+	import Tabs from './shared/Tabs.svelte';
+	import CreatePollForm from './componants/CreatePollForm.svelte';
+
+
+//Tabs
+let items =['Current Polls','Add New Poll'];
+let activeItems ='Current Polls';
+const tabChange =(e) => {
+	activeItems = e.detail;
+}
+
+	let polls =[
+		{
+			id:1,
+			question:'python or javaScript?',
+			Answer:'python',
+			Answer:'javascript',
+			votesA:9,
+			votesB:15,
+		},
+	];
+	const handleAdd = (e) => {
+		const poll = e.detail;
+		polls =[poll, ...polls];
+		console.log(polls);
+		activeItems ='Current polls';
+	}
+</script>
+
+<Header />
+<main>
+	<Tabs {activeItems} {items} on:tabChange={tabChange} /> 
+	{#if activeItems === 'Current Polls'}
+	<PollList {polls} />
+	<p>Poll List Component Goes Here</p>
+	{:else if activeItems === 'Add New Poll'}
+	<CreatePollForm on:add={handleAdd} />
+
+	{/if}
+</main>
+<Footer />
+
+<style>
+	main{
+		max-width: 960px;
+		margin: 40px auto;
+	}
+</style>
+
+
+
+--------------------------------------------------------------------------------------------------------------------------
+Poll Form ninja
+
+---------------------------------------------------------------------------------------------------------------------------
+
+<script>
+    import { createEventDispatcher } from 'svelte';
+    import Button from '../shared/Button.svelte';
+
+        let dispatch = createEventDispatcher();
+        let fields ={Question: '',AnswerA: '',AnswerB: ''};
+        let error ={Question: '',AnswerA: '',AnswerB: ''};
+        let valid = false;
+
+        const submithanler =() =>{
+           valid = true;
+
+         if(fields.Question.trim().length < 5)  {
+            valid= false;
+            error.Question = 'Question must be at least 5 characters long';
+         }
+         else{
+            error.Question = '';
+         }
+
+         if(fields.AnswerA.trim().length < 1)  {
+            valid= false;
+            error.AnswerA = 'Ansswer A cannot be empty';
+         }
+         else{
+            error.AnswerA = '';
+         }
+
+         if(fields.AnswerB.trim().length < 1)  {
+            valid= false;
+            error.AnswerB = 'Answer B cannot be empty';
+         }
+         else{
+            error.AnswerB = '';
+         }
+
+         if (valid){
+            let poll = {...fields, votesA: 0, votesB: 0, id: Math.random()}
+          dispatch('add', poll);
+        // console.log('valid',fields);
+         }
+        }
+</script>
+<form on:submit|preventDefault={submithanler}>
+    <div class ="form-field">
+        <label for="Question">Poll Question</label>
+        <input type="text" id="Question" bind:value={fields.Question}>
+        <div class ="error">{error.Question}</div>
+    </div>
+    <div class ="form-field">
+        <label for="Answer-A">Answer A:</label>
+        <input type="text" id="Answer-A" bind:value={fields.AnswerA}>
+        <div class ="error">{error.AnswerA}</div>
+    </div>
+    <div class ="form-field">
+        <label for="Answer-B">Answer B:</label>
+        <input type="text" id="Answer-B" bind:value={fields.AnswerB}>
+        <div class ="error">{error.AnswerB}</div>
+    </div>
+ <Button type = "primary" flat={true}, inverse={true}>Add Poll</Button>
+</form>
+<style>
+    form{
+        width: 300px;
+        margin: 0 auto;
+        text-align: center;
+    }
+    .form-field{
+        margin: 18px;
+
+    }
+    input{
+        width: 150%;
+        border-radius: 6px;
+
+    }
+    label{
+        margin: 10px;
+        text-align: left;
+    }
+    .error{
+        font-weight: 12px;
+        font-size: 12px;
+        color:#d91b42;
+     
+    }
+</style>
